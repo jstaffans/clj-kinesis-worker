@@ -20,7 +20,8 @@
 
 (log/merge-config!
   {:level      :info
-   :middleware [#_(fn min-level-for-ns [msg]
+   ;; reduce logging from the slf4j adapter to WARN
+   :middleware [(fn min-level-for-ns [msg]
                   (when
                     (or (not= "slf4j-timbre.adapter" (:?ns-str msg))
                       (log/level>= (:level msg) :warn))
@@ -118,7 +119,6 @@
                     (shutdown [_ checkpointer reason]
                       (shutdown processor @shard-id checkpointer reason)
                       (reset! shard-id nil))))))]
-        (clojure.pprint/pprint (bean config))
         (Worker.
           processor-factory
           config
@@ -152,7 +152,7 @@
       {:kinesis              {:endpoint "http://localhost:4567"}
        :dynamodb             {:endpoint "http://localhost:4568"}
        :region               "eu-west-1"
-       :stream-name          "Stream"
+       :stream-name          "some-stream"
        :app-name             "some-app"
        :processor-factory-fn new-processor}))
 
