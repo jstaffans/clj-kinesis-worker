@@ -102,7 +102,7 @@
             ^KinesisClientLibConfiguration config
             (doto-cond [c (KinesisClientLibConfiguration. app-name stream-name provider worker-id)]
               :always (.withInitialPositionInStream (initial-position-enum initial-position))
-              region (.withRegion (aws-region-enum region)))
+              region (.withRegionName (name region)))
             ^AmazonCloudWatchClient cloudwatch-client
             (cloudwatch-client config worker-opts)
             processor-factory
