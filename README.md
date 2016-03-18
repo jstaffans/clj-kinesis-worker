@@ -71,7 +71,8 @@ authentication.
 
 ## TODO
 
-Client configuration like max retries, timeouts.
+* Client configuration like max retries, timeouts
+* Wrap checkpointer, provide default retry logic
 
 ## License
 
