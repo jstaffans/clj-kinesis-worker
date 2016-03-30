@@ -18,7 +18,7 @@
             Worker InitialPositionInStream]
            [com.amazonaws.services.dynamodbv2 AmazonDynamoDBClient]))
 
-(log/merge-config!
+#_(log/merge-config!
   {:level      :info
    ;; reduce logging from the slf4j adapter to WARN
    :middleware [(fn min-level-for-ns [msg]
