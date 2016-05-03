@@ -38,6 +38,12 @@ A worker can then be created:
      :processor-factory-fn new-processor}))
 ```
 
+There is also an `:initial-position` option that can take two values: `:trim-horizon` and `:latest`. This refers to the point in the 
+Kinesis log stream that the worker starts reading events from **the first time the application is launched**. If the application is 
+already known to the KCL, the KCL has created a DynamoDB table with information on what the last Sequence ID was that the application
+processed. This information takes precedence over the `:initial-position` configuration. You can of course delete the DynamoDB table
+to force the application to take the `:initial-position` option into account.
+
 ## Development
 
 KCL uses both DynamoDB and Kinesis to keep track of and process events. Both DynamoDB and Kinesis can be mocked locally:
