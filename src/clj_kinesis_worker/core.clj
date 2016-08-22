@@ -84,7 +84,7 @@
 (def ^:private worker*
   (memoize
     (fn
-      [{:keys [provider region kinesis dynamodb worker-id app-name stream-name initial-position processor-factory-fn]
+      [{:keys [provider region kinesis dynamodb worker-id app-name stream-name initial-position failover-time processor-factory-fn]
         :or   {worker-id (default-worker-id) initial-position :latest}
         :as   worker-opts}]
       ;; TODO: client configuration such as timeout, max retries
@@ -92,6 +92,7 @@
             _ (assert (not (nil? stream-name)) ":stream-name missing")
             _ (assert (fn? processor-factory-fn) "value of :processor-factory-fn is not a function")
             _ (assert (contains? #{:trim-horizon :latest} initial-position) "value of :initial-position is invalid")
+            _ (when failover-time (assert (and (integer? failover-time) (pos? failover-time)) "value of :failover-time must be a positive integer"))
 
             ^AWSCredentialsProvider provider
             (or provider (DefaultAWSCredentialsProviderChain.))
@@ -101,8 +102,9 @@
             (kinesis-client (merge worker-opts kinesis))
             ^KinesisClientLibConfiguration config
             (doto-cond [c (KinesisClientLibConfiguration. app-name stream-name provider worker-id)]
-              :always (.withInitialPositionInStream (initial-position-enum initial-position))
-              region (.withRegionName (name region)))
+              :always       (.withInitialPositionInStream (initial-position-enum initial-position))
+              region        (.withRegionName (name region))
+              failover-time (.withFailoverTimeMillis failover-time))
             ^AmazonCloudWatchClient cloudwatch-client
             (cloudwatch-client config worker-opts)
             processor-factory
@@ -154,6 +156,7 @@
        :region               "eu-west-1"
        :stream-name          "some-stream"
        :app-name             "some-app"
+       :failover-time        60000
        :processor-factory-fn new-processor}))
 
   (.run worker)
